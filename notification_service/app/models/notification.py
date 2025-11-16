@@ -13,6 +13,7 @@ class NotificationType(str, Enum):
     SHIFT_SHORTENED = "shift_shortened"
     SHIFT_REALLOCATED = "shift_reallocated"
     REVIEW_REJECTED = "review_rejected"
+    PAYMENT_COMPLETE = "payment_complete"
 
 class NotificationStatus(str, Enum):
     SENT = "sent"
