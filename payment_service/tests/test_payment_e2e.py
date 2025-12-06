@@ -1,20 +1,14 @@
-"""
-E2E tests for Payment Service API
-"""
 import pytest
 import requests
 import time
 
-# Base URL for the payment service
 BASE_URL = "http://localhost:8001/api/payments"
 
 def test_api_health():
-    """Test that API is responding"""
     response = requests.get(f"{BASE_URL}/")
     assert response.status_code == 200
 
 def test_create_payment():
-    """Test creating a payment via API"""
     payment_data = {
         "amount": 100.0,
         "currency": "USD"
@@ -33,7 +27,6 @@ def test_create_payment():
     return data["id"]
 
 def test_get_payments():
-    """Test retrieving payments list via API"""
     response = requests.get(f"{BASE_URL}/")
 
     assert response.status_code == 200
@@ -56,9 +49,7 @@ def test_process_payment():
     assert data["status"] in ["success", "failed"]
 
 def test_payment_not_found():
-    """Test error handling for non-existent payment"""
     fake_id = "00000000-0000-0000-0000-000000000000"
     response = requests.get(f"{BASE_URL}/{fake_id}")
 
-    # Should return 404 or 400
     assert response.status_code in [404, 400]

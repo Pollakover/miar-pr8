@@ -133,18 +133,18 @@ jobs:
         with:
           registry: cr.yandex
           username: json_key
-          password: ${{ secrets.YC_KEYS }}
+          password: ${{ vars.YC_KEYS }}
 
       - name: Push YC images
         run: |
           docker load -i notification-service.tar
           docker load -i payment-service.tar
 
-          docker tag notification-service:latest cr.yandex/${{ secrets.YC_REGISTRY_ID }}/notification-service:latest
-          docker tag payment-service:latest cr.yandex/${{ secrets.YC_REGISTRY_ID }}/payment-service:latest
+          docker tag notification-service:latest cr.yandex/${{ vars.YC_REGISTRY_ID }}/notification-service:latest
+          docker tag payment-service:latest cr.yandex/${{ vars.YC_REGISTRY_ID }}/payment-service:latest
 
-          docker push cr.yandex/${{ secrets.YC_REGISTRY_ID }}/notification-service:latest
-          docker push cr.yandex/${{ secrets.YC_REGISTRY_ID }}/payment-service:latest
+          docker push cr.yandex/${{ vars.YC_REGISTRY_ID }}/notification-service:latest
+          docker push cr.yandex/${{ vars.YC_REGISTRY_ID }}/payment-service:latest
 
   deploy-notification:
     runs-on: ubuntu-latest
@@ -153,23 +153,23 @@ jobs:
       - name: Deploy notification service
         uses: yc-actions/yc-sls-container-deploy@v4
         with:
-          yc-sa-json-credentials: ${{ secrets.YC_KEYS }}
-          container-name: ${{ secrets.YC_CONTAINER_NAME_NOTIFICATION }}
-          folder-id: ${{ secrets.YC_FOLDER_ID }}
-          revision-image-url: cr.yandex/${{ secrets.YC_REGISTRY_ID }}/notification-service:latest
-          revision-service-account-id: ${{ secrets.YC_SA_ID }}
+          yc-sa-json-credentials: ${{ vars.YC_KEYS }}
+          container-name: ${{ vars.YC_CONTAINER_NAME_NOTIFICATION }}
+          folder-id: ${{ vars.YC_FOLDER_ID }}
+          revision-image-url: cr.yandex/${{ vars.YC_REGISTRY_ID }}/notification-service:latest
+          revision-service-account-id: ${{ vars.YC_SA_ID }}
           revision-memory: 512Mb
 
-  deploy-payment:
-    runs-on: ubuntu-latest
-    needs: push-to-yandexcloud
-    steps:
-      - name: Deploy payment service
-        uses: yc-actions/yc-sls-container-deploy@v4
-        with:
-          yc-sa-json-credentials: ${{ secrets.YC_KEYS }}
-          container-name: ${{ secrets.YC_CONTAINER_NAME_PAYMENT }}
-          folder-id: ${{ secrets.YC_FOLDER_ID }}
-          revision-image-url: cr.yandex/${{ secrets.YC_REGISTRY_ID }}/payment-service:latest
-          revision-service-account-id: ${{ secrets.YC_SA_ID }}
-          revision-memory: 512Mb
+#  deploy-payment:
+#    runs-on: ubuntu-latest
+#    needs: push-to-yandexcloud
+#    steps:
+#      - name: Deploy payment service
+#        uses: yc-actions/yc-sls-container-deploy@v4
+#        with:
+#          yc-sa-json-credentials: ${{ vars.YC_KEYS }}
+#          container-name: ${{ vars.YC_CONTAINER_NAME_PAYMENT }}
+#          folder-id: ${{ vars.YC_FOLDER_ID }}
+#          revision-image-url: cr.yandex/${{ vars.YC_REGISTRY_ID }}/payment-service:latest
+#          revision-service-account-id: ${{ vars.YC_SA_ID }}
+#          revision-memory: 512Mb

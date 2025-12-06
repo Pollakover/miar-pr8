@@ -1,12 +1,8 @@
-"""
-Unit tests for Notification Service
-"""
 import pytest
 from uuid import uuid4
 from datetime import datetime
 
 def test_notification_type_enum():
-    """Test notification type values"""
     from app.models.notification import NotificationType
 
     assert NotificationType.ORDER_PLACED == "order_placed"
@@ -14,14 +10,12 @@ def test_notification_type_enum():
     assert NotificationType.CLEANING_DONE == "cleaning_done"
 
 def test_notification_status_enum():
-    """Test notification status values"""
     from app.models.notification import NotificationStatus
 
     assert NotificationStatus.SENT == "sent"
     assert NotificationStatus.FAILED == "failed"
 
 def test_notification_model_creation():
-    """Test basic notification model creation"""
     from app.models.notification import Notification, NotificationType, NotificationStatus
 
     notification_id = uuid4()
