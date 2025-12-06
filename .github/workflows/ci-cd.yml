@@ -64,7 +64,7 @@ jobs:
       - name: Run tests for payment_service
         working-directory: payment_service
         run: |
-          pytest tests/e2e/ -v --tb=short
+          pytest tests -v --tb=short
 
       - name: Stop and remove payment test container
         run: |
