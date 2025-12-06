@@ -32,13 +32,11 @@ def test_payment_model_creation():
     assert isinstance(payment.created_at, datetime)
 
 def test_payment_model_defaults():
-    """Test payment model default values"""
     from app.models.payment import Payment
 
     payment = Payment(
         id=uuid4(),
         amount=50.0
-        # currency not provided, should use default
     )
 
     assert payment.currency == "USD"

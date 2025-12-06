@@ -41,13 +41,10 @@ def test_get_payments():
     assert isinstance(payments, list)
 
 def test_process_payment():
-    """Test processing a payment via API"""
-    # First create a payment
     payment_data = {"amount": 150.0}
     create_response = requests.post(f"{BASE_URL}/", json=payment_data)
     payment_id = create_response.json()["id"]
 
-    # Process the payment
     process_data = {"success": True}
     process_response = requests.post(
         f"{BASE_URL}/{payment_id}/process",
