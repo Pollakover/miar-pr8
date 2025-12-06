@@ -36,7 +36,7 @@ jobs:
       - name: Run tests for notification_service
         working-directory: notification_service
         run: |
-          pytest tests/e2e/ -v --tb=short
+          pytest tests -v --tb=short
 
       - name: Stop and remove notification test container
         run: |
