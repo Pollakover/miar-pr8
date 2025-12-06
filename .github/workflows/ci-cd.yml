@@ -15,30 +15,53 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - name: Install Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-
-      - name: Install dependencies for notification_service
+      ############################################
+      # notification_service tests
+      ############################################
+      - name: Build notification service (test image)
         working-directory: notification_service
         run: |
-          pip install -r requirements.txt
+          docker build . -t notification-service:test
+
+      - name: Run notification service for tests
+        run: |
+          docker run -d -p 8002:80 --name notification-test notification-service:test
+          echo "Waiting for notification service startup..."
+          sleep 10
 
       - name: Run tests for notification_service
         working-directory: notification_service
         run: |
-          pytest
+          pytest tests/e2e/ -v --tb=short
 
-      - name: Install dependencies for payment_service
+      - name: Stop and remove notification test container
+        run: |
+          docker stop notification-test
+          docker rm notification-test
+
+      ############################################
+      # payment_service tests
+      ############################################
+      - name: Build payment service (test image)
         working-directory: payment_service
         run: |
-          pip install -r requirements.txt
+          docker build . -t payment-service:test
+
+      - name: Run payment service for tests
+        run: |
+          docker run -d -p 8001:80 --name payment-test payment-service:test
+          echo "Waiting for payment service startup..."
+          sleep 10
 
       - name: Run tests for payment_service
         working-directory: payment_service
         run: |
-          pytest
+          pytest tests/e2e/ -v --tb=short
+
+      - name: Stop and remove payment test container
+        run: |
+          docker stop payment-test
+          docker rm payment-test
 
   build-images:
     needs: test
