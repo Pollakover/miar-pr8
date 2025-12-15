@@ -17,7 +17,6 @@ notification_consumer = None
 consumer_thread = None
 
 def start_consumer():
-    """Запуск потребителя в отдельном потоке"""
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
 
@@ -35,7 +34,6 @@ def start_consumer():
 
 @app.on_event("startup")
 async def startup_event():
-    """Запуск потребителя при старте приложения"""
     global consumer_thread
 
     # Запускаем consumer в отдельном потоке, чтобы не блокировать FastAPI
@@ -45,7 +43,6 @@ async def startup_event():
 
 @app.on_event("shutdown")
 async def shutdown_event():
-    """Остановка приложения"""
     logger.info("Shutting down Notification Service")
 
 @app.get("/health")
@@ -55,3 +52,7 @@ async def health_check():
         "service": "notification",
         "consumer_alive": consumer_thread.is_alive() if consumer_thread else False
     }
+
+@app.get("/")
+async def root():
+    return {"message": "Notification Service is running"}
