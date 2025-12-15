@@ -1,0 +1,86 @@
+{
+  "dashboard": {
+    "title": "Microsservices Monitoring",
+    "tags": ["microsservices", "monitoring"],
+    "timezone": "browser",
+    "panels": [
+      {
+        "title": "HTTP Requests Rate",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0},
+        "targets": [
+          {
+            "expr": "rate(http_requests_total[5m])",
+            "legendFormat": "{{instance}} - {{method}} {{endpoint}}",
+            "refId": "A"
+          }
+        ]
+      },
+      {
+        "title": "HTTP Response Codes",
+        "type": "stat",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0},
+        "targets": [
+          {
+            "expr": "sum by (status) (http_requests_total)",
+            "legendFormat": "Status {{status}}",
+            "refId": "A"
+          }
+        ]
+      },
+      {
+        "title": "Payments Created",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
+        "targets": [
+          {
+            "expr": "rate(payments_created_total[5m])",
+            "legendFormat": "Payments Created",
+            "refId": "A"
+          }
+        ]
+      },
+      {
+        "title": "Notifications Sent",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8},
+        "targets": [
+          {
+            "expr": "rate(notifications_sent_total[5m])",
+            "legendFormat": "Notifications - {{type}}",
+            "refId": "A"
+          }
+        ]
+      },
+      {
+        "title": "SQLite Database Size",
+        "type": "gauge",
+        "gridPos": {"h": 8, "w": 8, "x": 0, "y": 16},
+        "targets": [
+          {
+            "expr": "sqlite_db_size_bytes",
+            "format": "bytes",
+            "instant": true,
+            "refId": "A"
+          }
+        ]
+      },
+      {
+        "title": "Table Row Count",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 16, "x": 8, "y": 16},
+        "targets": [
+          {
+            "expr": "sqlite_table_rows",
+            "legendFormat": "{{table}}",
+            "refId": "A"
+          }
+        ]
+      }
+    ],
+    "time": {"from": "now-1h", "to": "now"},
+    "refresh": "5s"
+  },
+  "overwrite": true,
+  "folderUid": "general"
+}

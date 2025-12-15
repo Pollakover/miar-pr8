@@ -1,4 +1,5 @@
 version: '3.9'
+
 services:
   rabbitmq:
     image: rabbitmq:3-management
@@ -8,6 +9,8 @@ services:
     environment:
       - RABBITMQ_DEFAULT_USER=guest
       - RABBITMQ_DEFAULT_PASS=guest
+    networks:
+      - monitoring
 
   payment_service:
     build: ./payment_service
@@ -17,6 +20,13 @@ services:
       - rabbitmq
     environment:
       - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/
+    volumes:
+      - ./payment_service/payments.db:/app/payments.db
+    networks:
+      - monitoring
+    labels:
+      - "logging=promtail"
+      - "logging_job=payment_service"
 
   notification_service:
     build: ./notification_service
@@ -26,3 +36,98 @@ services:
       - rabbitmq
     environment:
       - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/
+    networks:
+      - monitoring
+    labels:
+      - "logging=promtail"
+      - "logging_job=notification_service"
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=200h'
+    ports:
+      - "9090:9090"
+    restart: unless-stopped
+    networks:
+      - monitoring
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+    depends_on:
+      - prometheus
+      - loki
+    networks:
+      - monitoring
+
+  loki:
+    image: grafana/loki:3.0.0  # Используем стабильную версию
+    container_name: loki
+    ports:
+      - "3100:3100"
+    command: -config.file=/etc/loki/local-config.yaml
+    volumes:
+      - ./loki/loki-config.yaml:/etc/loki/local-config.yaml
+      - loki_data:/loki
+    restart: unless-stopped
+    networks:
+      - monitoring
+
+  promtail:
+    image: grafana/promtail:3.0.0  # Используем стабильную версию
+    container_name: promtail
+    volumes:
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./promtail/promtail-config.yaml:/etc/promtail/config.yaml
+    command: -config.file=/etc/promtail/config.yaml
+    restart: unless-stopped
+    depends_on:
+      - loki
+    networks:
+      - monitoring
+
+  # SQLite Exporter для сбора метрик базы данных
+  sqlite_exporter:
+    build:
+      context: ./sqlite-exporter
+      dockerfile: Dockerfile
+    container_name: sqlite_exporter
+    ports:
+      - "8082:8082"
+    volumes:
+      - ./payment_service/payments.db:/app/payments.db
+    environment:
+      - SQLITE_DB_PATH=/app/payments.db
+    restart: unless-stopped
+    networks:
+      - monitoring
+
+networks:
+  monitoring:
+    driver: bridge
+
+volumes:
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
+  loki_data:
+    driver: local

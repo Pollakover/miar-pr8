@@ -4,3 +4,4 @@ pydantic==2.5.0
 aio-pika==9.2.0
 pytest==7.4.0
 requests==2.31.0
+prometheus-client==0.20.0

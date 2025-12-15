@@ -7,9 +7,13 @@ from app.repositories.db_payment_repo import PaymentRepo
 from app.clients.rabbitmq_client import RabbitMQClient
 from pydantic import BaseModel
 
+from app.metrics import PAYMENTS_CREATED, PAYMENTS_PROCESSED, ACTIVE_PAYMENTS
+
+
 class CreatePaymentRequest(BaseModel):
     amount: float
     currency: str | None = "USD"
+
 
 class PaymentService:
     def __init__(self):
@@ -27,7 +31,13 @@ class PaymentService:
             status=PaymentStatus.CREATED,
             created_at=datetime.utcnow()
         )
-        return self.repo.create_payment(payment)
+        result = self.repo.create_payment(payment)
+
+        # Обновляем метрики
+        PAYMENTS_CREATED.inc()
+        ACTIVE_PAYMENTS.inc()
+
+        return result
 
     async def process_payment(self, id: UUID, success: bool):
         payment = self.repo.get_payment_by_id(id)
@@ -37,10 +47,13 @@ class PaymentService:
         payment.status = PaymentStatus.SUCCESS if success else PaymentStatus.FAILED
         updated_payment = self.repo.update_status(payment)
 
+        # Обновляем метрики
+        status_label = "success" if success else "failed"
+        PAYMENTS_PROCESSED.labels(status=status_label).inc()
+
         # Отправляем уведомление в RabbitMQ только при успешном платеже
         if success and updated_payment.status == PaymentStatus.SUCCESS:
-            # Запускаем отправку уведомления в фоне, не дожидаясь ответа
-            await asyncio.create_task(
+            asyncio.create_task(
                 self.rabbitmq_client.send_payment_notification(updated_payment.id)
             )
 
