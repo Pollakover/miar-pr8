@@ -160,16 +160,16 @@ jobs:
           revision-service-account-id: ${{ vars.YC_SA_ID }}
           revision-memory: 512Mb
 
-  deploy-payment:
-    runs-on: ubuntu-latest
-    needs: push-to-yandexcloud
-    steps:
-      - name: Deploy payment service
-        uses: yc-actions/yc-sls-container-deploy@v4
-        with:
-          yc-sa-json-credentials: ${{ vars.YC_KEYS }}
-          container-name: ${{ vars.YC_CONTAINER_NAME_PAYMENT }}
-          folder-id: ${{ vars.YC_FOLDER_ID }}
-          revision-image-url: cr.yandex/${{ vars.YC_REGISTRY_ID }}/payment-service:latest
-          revision-service-account-id: ${{ vars.YC_SA_ID }}
-          revision-memory: 512Mb
+#  deploy-payment:
+#    runs-on: ubuntu-latest
+#    needs: push-to-yandexcloud
+#    steps:
+#      - name: Deploy payment service
+#        uses: yc-actions/yc-sls-container-deploy@v4
+#        with:
+#          yc-sa-json-credentials: ${{ vars.YC_KEYS }}
+#          container-name: ${{ vars.YC_CONTAINER_NAME_PAYMENT }}
+#          folder-id: ${{ vars.YC_FOLDER_ID }}
+#          revision-image-url: cr.yandex/${{ vars.YC_REGISTRY_ID }}/payment-service:latest
+#          revision-service-account-id: ${{ vars.YC_SA_ID }}
+#          revision-memory: 512Mb
